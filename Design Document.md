@@ -132,6 +132,50 @@ of the processor is not relinquished.
 
 # Memory Stage
 
+This stage remained unimplemented in this project.
+
 # Writeback Stage
 
+The writeback stage is possibly the fastest stage in the pipeline. During the
+writeback stage, the value held by the 32-bit MEM/WB pipeline register is
+written to the register denoted by pipeline register Rw.
+
+The register writeback also occurs during the falling edge of the clock cycle.
+For more information on why, refer to Resolving Data Hazards below.
+
+# Resolving Data Hazards
+
+Data hazards occur when an instruction attempts to use a register whose value
+has not yet been updated. For example:
+
+```mips
+ADDI $1, $0, 100
+ADDI $2, $1, 1
+```
+
+By the time the second instruction is executed, the processor will not have
+written the new value to register `$1`. Therefore, in order to account for such
+hazards, the proper value from the register must be forwarded to the appropriate
+stage.
+
+image: forwarding
+
+With this implementation of forwarding, the values from the following stages
+are sent back to the Execute stage. The proper value is chosen via a
+multiplexer. The deciding input for the multiplexer is sent from the forwarding
+unit:
+
+image: forwarding unit
+
+This unit takes in 4 inputs, each a register number. The registers are compared;
+if the register being read by the current instruction matches the register being
+written by a previous instruction, there is a data hazard. The forwarding unit
+detects this and outputs the proper bits to select the inputs appropriately.
+
 # Summary
+
+Overall, the MIPS processor conducts a wide range of basic instructions. It can
+handle data hazards through forwarding logic and conducts many operations
+simultaneously due to its 5-stage pipelined design.
+
+
