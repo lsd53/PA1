@@ -1,0 +1,37 @@
+#############
+## Table A ##
+#############
+
+001001				ADDIU	 1			add constant unsigned
+001100				ANDI	1			bitwise AND with constant
+001101				ORI	1				bitwise OR with constant
+001110				XORI	1			bitwise XOR with constant
+001010				SLTI				set less than constant
+001011				SLTIU				set less than unsigned
+
+000000, 100001		ADDU	1			add unsigned
+000000, 100011		SUBU	1			sub unsigned
+000000, 100100		AND     1
+000000, 100101		OR      1
+000000, 100110		XOR     1
+000000, 100111		NOR	1
+000000, 101010		SLT
+000000, 101011		SLTU
+
+000000, 001011		MOVN rs rt rd	1	if rt != 0 then rd := rs
+000000, 001010		MOVZ rs rt rd	1	if rt = 0 then rd := rs
+
+000000, 000000		SLL rt rd sa	1	shift rt by sa then store in rd
+000000, 000010		SRL		1
+000000, 000011		SRA		1			arithmetic shift right
+000000, 000100		SLLV		1		SLL with register
+000000, 000110		SRLV            1
+000000, 000111		SRAV            1
+
+001111				LUI					Shift a 16-bit intermediate left by 16 and store in register
+
+
+#############
+## Table B ##
+#############
+
