@@ -1,8 +1,6 @@
 ---
 title: CS 3410 Pipelined MIPS Processor
 authors: Luis Gustavo de Medeiros (lsd53), Ajay Gandhi (aag255)
-abstract: This document details the design of the MIPS processor, highlighting
-details about core logic.
 ---
 
 # Introduction
