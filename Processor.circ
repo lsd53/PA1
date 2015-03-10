@@ -33,7 +33,7 @@ This file is intended to be loaded by Logisim (http://www.cburch.com/logisim/).
       <a name="contents" val=""/>
     </tool>
   </lib>
-  <main name="Processor"/>
+  <main name="MIPS32"/>
   <options>
     <a name="gateUndefined" val="ignore"/>
     <a name="simlimit" val="1000"/>
@@ -66,8 +66,8 @@ This file is intended to be loaded by Logisim (http://www.cburch.com/logisim/).
     <tool lib="1" name="AND Gate"/>
     <tool lib="1" name="OR Gate"/>
   </toolbar>
-  <circuit name="Processor">
-    <a name="circuit" val="Processor"/>
+  <circuit name="MIPS32">
+    <a name="circuit" val="MIPS32"/>
     <a name="clabel" val=""/>
     <a name="clabelup" val="east"/>
     <a name="clabelfont" val="SansSerif plain 12"/>
