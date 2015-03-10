@@ -58,7 +58,7 @@ of execution of the program, there is a 32-bit register called the Program
 Counter (PC). Because there were no jumps or branches for this project, the PC
 was controlled solely by the Incrementer.
 
-image: fetch stage
+!(./images/fetch.png)[The Fetch stage]
 
 ## PC Incrementer
 
@@ -66,7 +66,7 @@ After executing an instruction, the program counter needs to be incremented by
 4. This is done using a one-bit adder. In order to prevent using the same adder
 4 times in series, the following subcircuit was created:
 
-image: PC+4
+!(./images/pcplus.png)[The Program Counter incrementer]
 
 By removing the first two bits of the program counter before adding 1, the
 program counter is automatically incremented by 4 with just one operation.
@@ -158,7 +158,7 @@ written the new value to register `$1`. Therefore, in order to account for such
 hazards, the proper value from the register must be forwarded to the appropriate
 stage.
 
-image: forwarding
+!(./images/forwarding.png)[Forwarding logic]
 
 With this implementation of forwarding, the values from the following stages
 are sent back to the Execute stage. The proper value is chosen via a
