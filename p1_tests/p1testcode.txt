@@ -1,0 +1,163 @@
+## desc = The old P1 test program.
+## cycles = 70
+
+##  expect[1] = 0xffffffff
+##  expect[2] = 0x00000001
+##  expect[3] = 0x00007ff0
+##  expect[4] = 0xffff8000
+##  expect[5] = 0x00005555
+##  expect[6] = 0x0000aaaa
+##  expect[7] = 0x0000aaa1
+##  expect[8] = 0x0000aaab
+##  expect[9] = 0x00005556
+## expect[10] = 0xffffaaac
+## expect[11] = 0x00005550
+## expect[12] = 0x00007ff1
+## expect[13] = 0x00005554
+## expect[14] = 0xffffaaaa
+## expect[15] = 0x0000d55e
+## expect[16] = 0xfff80000
+## expect[17] = 0x1ffff000
+## expect[18] = 0xffffe000
+## expect[19] = 0xfe000000
+## expect[20] = 0x003fffe0
+## expect[21] = 0xffffffe0
+## expect[22] = 0x55550000
+## expect[23] = 0x00000016
+## expect[24] = 0x00000016
+## expect[25] = 0x00000016
+## expect[26] = 0x00000016
+## expect[27] = 0x05800000
+## expect[28] = 0x00000004
+## expect[29] = 0x00000005
+## expect[30] = 0x00000000
+## expect[31] = 0x4eed1001
+
+.text 0x00000000
+
+#
+# immediate arithmetic and logic
+#
+
+# addiu should sign extend 
+# common mistakes: 
+#  - zero extending for addiu 
+addiu $1, $0, 0xffff # $1 = 0xffffffff
+addiu $2, $0, 1      # $2 = 0x00000001
+addiu $3, $0, 0x7ff0 # $3 = 0x00007ff0
+addiu $4, $0, 0x8000 # $4 = 0xffff8000
+
+# others should zero extend
+# common mistakes: 
+#  - sign extending for logical operations
+#  - Erroneously decoding an I-type instruction as a MOV if the
+#    last six bits of the immediate are 0xa or 0xb
+andi $5, $1, 0x5555  # $5 = 0xffffffff & 0x00005555 = 0x00005555
+andi $6, $1, 0xaaaa  # $6 = 0xffffffff & 0x0000aaaa = 0x0000aaaa
+ori $7, $2, 0xaaa0   # $7 = 0x00000001 | 0x0000aaa0 = 0x0000aaa1
+xori $8, $2, 0xaaaa  # $8 = 0x00000001 ^ 0x0000aaaa = 0x0000aaab
+
+#
+# register arithmetic and logic
+#
+
+# these are hard to get wrong
+# common mistakes:
+#  - none
+addu $9, $2, $5   # $9  = 0x00000001 + 0x00005555  = 0x00005556
+subu $10, $2, $5  # $10 = 0x00000001 - 0x00005555  = 0xffffaaac
+and $11, $3, $5   # $11 = 0x00007ff0 & 0x00005555  = 0x00005550
+or $12, $2, $3    # $12 = 0x00000001 | 0x00007ff0  = 0x00007ff1
+xor $13, $2, $5   # $13 = 0x00000001 ^ 0x00005555  = 0x00005554
+nor $14, $2, $5   # $14 = 0x00000001 ~| 0x00005555 = 0xffffaaaa
+
+#
+# shifts
+#
+
+# constant shifts
+# common mistakes:
+#  - none
+sll $16, $4, 4    # $16 = 0xffff8000 << 4  = 0xfff80000
+srl $17, $4, 3    # $17 = 0xffff8000 >>> 3 = 0x1ffff000
+sra $18, $4, 2    # $18 = 0xffff8000 >> 2  = 0xffffe000
+
+# variables shifts; using shift amount ($6 mod 32) = (0x0000aaaa mod 32) = 0xa = 10
+# common mistakes:
+#  - not implementing variable shifts at all
+sllv $19, $4, $6  # $19 = 0xffff8000 << (0x0000aaaa mod 32) = 0xfe000000
+srlv $20, $4, $6 # $20 = 0xffff8000 >>> (0x0000aaaa mod 32) = 0x003fffe0
+srav $21, $4, $6  # $21 = 0xffff8000 >> (0x0000aaaa mod 32) = 0xffffffe0
+
+#
+# immediate load
+#
+
+# common mistakes:
+#  - various
+lui $22, 0x5555   # $22 = 0x55550000
+
+#
+# hazard testing
+# 
+
+# simple hazards: single earlier instruction has data, 1 to 3 cycles later
+# common mistakes:
+#  - not handling 3-cycle hazard (e.g. via register file clock inversion hack)
+#  - not forwarding the variable shift amount
+ori $23, $0, 0xb   # $23 = 0xb
+addu $24, $23, $23 # $24 = 0xb + 0xb = 0x16; 1-cycle hazard on both a and b
+addu $25, $23, $23 # $25 = 0xb + 0xb = 0x16; 2-cycle hazard on both a and b
+addu $26, $23, $23 # $26 = 0xb + 0xb = 0x16; 3-cycle hazard on both a and b
+addu $23, $23, $23 # $23 = 0xb + 0xb = 0x16
+sllv $27, $23, $23 # $27 = 0x16 << 0x16 = 0x05800000; 1-cycle hazard on both a and b
+
+# simultaneous hazards: two earlier instructions have data
+# common mistakes:
+#  - prioritizing the wrong forwarding path
+ori $28, $0, 0x1   # $28 = 0x1
+addu $28, $28, $28 # $28 = 0x1 + 0x1 = 0x2; 1-cycle hazard on both a and b, with source overwrite
+addu $28, $28, $28 # $28 = 0x2 + 0x2 = 0x4; 1+2-cycle hazard on both a and b
+
+# false hazard
+# common mistakes:
+#  - forwarding writes to $0 (writes to $0 should be ignored)
+ori $0, $0, 0xc    # nop
+addiu $29, $0, 0x5 # $29 = 0 + 0x5 = 0x5; 1-cycle false hazard on a
+addu $30, $0, $0   # $30 = 0 + 0x0 = 0x0; 2-cycle false hazard on both a and b
+
+#
+# summarize results for easy checking
+#
+
+# xor of $1 to $14 goes in $15
+xor $15, $1, $2
+xor $15, $15, $3
+xor $15, $15, $4
+xor $15, $15, $5
+xor $15, $15, $6
+xor $15, $15, $7
+xor $15, $15, $8
+xor $15, $15, $9
+xor $15, $15, $10
+xor $15, $15, $11
+xor $15, $15, $12
+xor $15, $15, $13
+xor $15, $15, $14 # $15 = 0x0000d55e
+
+# xor of $16 to $30 goes in $31
+xor $31, $16, $17
+xor $31, $31, $18
+xor $31, $31, $19
+xor $31, $31, $20
+xor $31, $31, $21
+xor $31, $31, $22
+xor $31, $31, $23
+xor $31, $31, $24
+xor $31, $31, $25
+xor $31, $31, $26
+xor $31, $31, $27
+xor $31, $31, $28
+xor $31, $31, $29
+xor $31, $31, $30 # $31 = 0x4eed1001
+
